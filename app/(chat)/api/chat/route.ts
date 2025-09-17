@@ -6,7 +6,6 @@ import {
   stepCountIs,
   streamText,
 } from 'ai';
-import { auth, type UserType } from '@/app/(auth)/auth';
 import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
 import {
   createStreamId,
@@ -107,20 +106,14 @@ export async function POST(request: Request) {
       selectedVisibilityType: VisibilityType;
     } = requestBody;
 
-    const session = await auth();
+    // Auth removed - all users can access
+    const userId = generateUUID(); // Generate a unique ID for anonymous users
+    const userType = 'regular';
 
-    if (!session?.user) {
-      return new ChatSDKError('unauthorized:chat').toResponse();
-    }
+    // Skip message count check for anonymous users
+    const messageCount = 0;
 
-    const userType: UserType = session.user.type;
-
-    const messageCount = await getMessageCountByUserId({
-      id: session.user.id,
-      differenceInHours: 24,
-    });
-
-    if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
+    if (messageCount > entitlementsByUserType['regular' as keyof typeof entitlementsByUserType].maxMessagesPerDay) {
       return new ChatSDKError('rate_limit:chat').toResponse();
     }
 
@@ -133,14 +126,12 @@ export async function POST(request: Request) {
 
       await saveChat({
         id,
-        userId: session.user.id,
+        userId,
         title,
         visibility: selectedVisibilityType,
       });
     } else {
-      if (chat.userId !== session.user.id) {
-        return new ChatSDKError('forbidden:chat').toResponse();
-      }
+      // Skip ownership check for anonymous users
     }
 
     const messagesFromDb = await getMessagesByChatId({ id });
@@ -192,10 +183,10 @@ export async function POST(request: Request) {
           experimental_transform: smoothStream({ chunking: 'word' }),
           tools: {
             getWeather,
-            createDocument: createDocument({ session, dataStream }),
-            updateDocument: updateDocument({ session, dataStream }),
+            createDocument: createDocument({ session: null, dataStream }),
+            updateDocument: updateDocument({ session: null, dataStream }),
             requestSuggestions: requestSuggestions({
-              session,
+              session: null,
               dataStream,
             }),
           },
@@ -307,18 +298,7 @@ export async function DELETE(request: Request) {
     return new ChatSDKError('bad_request:api').toResponse();
   }
 
-  const session = await auth();
-
-  if (!session?.user) {
-    return new ChatSDKError('unauthorized:chat').toResponse();
-  }
-
-  const chat = await getChatById({ id });
-
-  if (chat?.userId !== session.user.id) {
-    return new ChatSDKError('forbidden:chat').toResponse();
-  }
-
+  // Auth removed - allow all users to delete chats
   const deletedChat = await deleteChatById({ id });
 
   return Response.json(deletedChat, { status: 200 });

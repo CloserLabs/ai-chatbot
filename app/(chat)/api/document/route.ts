@@ -1,4 +1,4 @@
-import { auth } from '@/app/(auth)/auth';
+import { generateUUID } from '@/lib/utils';
 import type { ArtifactKind } from '@/components/artifact';
 import {
   deleteDocumentsByIdAfterTimestamp,
@@ -18,22 +18,13 @@ export async function GET(request: Request) {
     ).toResponse();
   }
 
-  const session = await auth();
-
-  if (!session?.user) {
-    return new ChatSDKError('unauthorized:document').toResponse();
-  }
-
+  // Auth removed - all users can get documents
   const documents = await getDocumentsById({ id });
 
   const [document] = documents;
 
   if (!document) {
     return new ChatSDKError('not_found:document').toResponse();
-  }
-
-  if (document.userId !== session.user.id) {
-    return new ChatSDKError('forbidden:document').toResponse();
   }
 
   return Response.json(documents, { status: 200 });
@@ -50,11 +41,8 @@ export async function POST(request: Request) {
     ).toResponse();
   }
 
-  const session = await auth();
-
-  if (!session?.user) {
-    return new ChatSDKError('not_found:document').toResponse();
-  }
+  // Auth removed - generate anonymous user ID
+  const userId = generateUUID();
 
   const {
     content,
@@ -65,20 +53,14 @@ export async function POST(request: Request) {
 
   const documents = await getDocumentsById({ id });
 
-  if (documents.length > 0) {
-    const [document] = documents;
-
-    if (document.userId !== session.user.id) {
-      return new ChatSDKError('forbidden:document').toResponse();
-    }
-  }
+  // Skip ownership check for anonymous users
 
   const document = await saveDocument({
     id,
     content,
     title,
     kind,
-    userId: session.user.id,
+    userId,
   });
 
   return Response.json(document, { status: 200 });
@@ -103,18 +85,13 @@ export async function DELETE(request: Request) {
     ).toResponse();
   }
 
-  const session = await auth();
-
-  if (!session?.user) {
-    return new ChatSDKError('unauthorized:document').toResponse();
-  }
-
+  // Auth removed - all users can delete documents
   const documents = await getDocumentsById({ id });
 
   const [document] = documents;
 
-  if (document.userId !== session.user.id) {
-    return new ChatSDKError('forbidden:document').toResponse();
+  if (!document) {
+    return new ChatSDKError('not_found:document').toResponse();
   }
 
   const documentsDeleted = await deleteDocumentsByIdAfterTimestamp({

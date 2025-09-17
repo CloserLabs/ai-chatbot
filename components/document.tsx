@@ -1,9 +1,8 @@
 import { memo } from 'react';
 
+import { useArtifact } from '@/hooks/use-artifact';
 import type { ArtifactKind } from './artifact';
 import { FileIcon, LoaderIcon, MessageIcon, PencilEditIcon } from './icons';
-import { toast } from 'sonner';
-import { useArtifact } from '@/hooks/use-artifact';
 
 const getActionText = (
   type: 'create' | 'update' | 'request-suggestions',
@@ -26,13 +25,11 @@ const getActionText = (
 interface DocumentToolResultProps {
   type: 'create' | 'update' | 'request-suggestions';
   result: { id: string; title: string; kind: ArtifactKind };
-  isReadonly: boolean;
 }
 
 function PureDocumentToolResult({
   type,
   result,
-  isReadonly,
 }: DocumentToolResultProps) {
   const { setArtifact } = useArtifact();
 
@@ -41,13 +38,6 @@ function PureDocumentToolResult({
       type="button"
       className="flex w-fit cursor-pointer flex-row items-start gap-3 rounded-xl border bg-background px-3 py-2"
       onClick={(event) => {
-        if (isReadonly) {
-          toast.error(
-            'Viewing files in shared chats is currently not supported.',
-          );
-          return;
-        }
-
         const rect = event.currentTarget.getBoundingClientRect();
 
         const boundingBox = {
@@ -92,13 +82,11 @@ interface DocumentToolCallProps {
     | { title: string; kind: ArtifactKind } // for create
     | { id: string; description: string } // for update
     | { documentId: string }; // for request-suggestions
-  isReadonly: boolean;
 }
 
 function PureDocumentToolCall({
   type,
   args,
-  isReadonly,
 }: DocumentToolCallProps) {
   const { setArtifact } = useArtifact();
 
@@ -107,13 +95,6 @@ function PureDocumentToolCall({
       type="button"
       className="cursor pointer flex w-fit flex-row items-start justify-between gap-3 rounded-xl border px-3 py-2"
       onClick={(event) => {
-        if (isReadonly) {
-          toast.error(
-            'Viewing files in shared chats is currently not supported.',
-          );
-          return;
-        }
-
         const rect = event.currentTarget.getBoundingClientRect();
 
         const boundingBox = {

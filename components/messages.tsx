@@ -1,14 +1,14 @@
-import { PreviewMessage, ThinkingMessage } from './message';
-import { Greeting } from './greeting';
-import { memo, useEffect } from 'react';
-import type { Vote } from '@/lib/db/schema';
-import equal from 'fast-deep-equal';
-import type { UseChatHelpers } from '@ai-sdk/react';
 import { useMessages } from '@/hooks/use-messages';
+import type { Vote } from '@/lib/db/schema';
 import type { ChatMessage } from '@/lib/types';
+import type { UseChatHelpers } from '@ai-sdk/react';
+import equal from 'fast-deep-equal';
+import { ArrowDownIcon } from 'lucide-react';
+import { memo, useEffect } from 'react';
 import { useDataStream } from './data-stream-provider';
 import { Conversation, ConversationContent } from './elements/conversation';
-import { ArrowDownIcon } from 'lucide-react';
+import { Greeting } from './greeting';
+import { PreviewMessage, ThinkingMessage } from './message';
 
 interface MessagesProps {
   chatId: string;
@@ -17,7 +17,6 @@ interface MessagesProps {
   messages: ChatMessage[];
   setMessages: UseChatHelpers<ChatMessage>['setMessages'];
   regenerate: UseChatHelpers<ChatMessage>['regenerate'];
-  isReadonly: boolean;
   isArtifactVisible: boolean;
   selectedModelId: string;
 }
@@ -29,7 +28,6 @@ function PureMessages({
   messages,
   setMessages,
   regenerate,
-  isReadonly,
   isArtifactVisible,
   selectedModelId,
 }: MessagesProps) {
@@ -85,7 +83,6 @@ function PureMessages({
               }
               setMessages={setMessages}
               regenerate={regenerate}
-              isReadonly={isReadonly}
               requiresScrollPadding={
                 hasSentMessage && index === messages.length - 1
               }
