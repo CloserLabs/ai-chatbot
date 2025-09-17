@@ -118,6 +118,9 @@ export function Chat({
     },
   });
 
+  console.log('messages:', messages);
+  console.log('status:', status);
+
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
 

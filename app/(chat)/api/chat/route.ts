@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     }
 
     const awsData = await awsResponse.json();
-    const assistantMessage = awsData.response || awsData.message || 'No response from AI';
+    const assistantMessage = awsData.completion || awsData.response || awsData.message || 'No response from AI';
 
     // Skip saving assistant message - no database setup
     console.log('Skipping assistant message save - no database setup');
