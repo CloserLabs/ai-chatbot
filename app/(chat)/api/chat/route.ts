@@ -1,87 +1,21 @@
 import {
-  convertToModelMessages,
-  createUIMessageStream,
-  JsonToSseTransformStream,
-  smoothStream,
-  stepCountIs,
-  streamText,
-} from 'ai';
-import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
-import {
-  createStreamId,
   deleteChatById,
   getChatById,
-  getMessageCountByUserId,
   getMessagesByChatId,
   saveChat,
   saveMessages,
 } from '@/lib/db/queries';
-import { updateChatLastContextById } from '@/lib/db/queries';
 import { convertToUIMessages, generateUUID } from '@/lib/utils';
 import { generateTitleFromUserMessage } from '../../actions';
-import { createDocument } from '@/lib/ai/tools/create-document';
-import { updateDocument } from '@/lib/ai/tools/update-document';
-import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
-import { getWeather } from '@/lib/ai/tools/get-weather';
-import { isProductionEnvironment } from '@/lib/constants';
-import { myProvider } from '@/lib/ai/providers';
-import { entitlementsByUserType } from '@/lib/ai/entitlements';
-import { postRequestBodySchema, type PostRequestBody } from './schema';
-import { geolocation } from '@vercel/functions';
-import {
-  createResumableStreamContext,
-  type ResumableStreamContext,
-} from 'resumable-stream';
-import { after } from 'next/server';
 import { ChatSDKError } from '@/lib/errors';
 import type { ChatMessage } from '@/lib/types';
 import type { ChatModel } from '@/lib/ai/models';
 import type { VisibilityType } from '@/components/visibility-selector';
-import { unstable_cache as cache } from 'next/cache';
-import { fetchModels } from 'tokenlens/fetch';
-import { getUsage } from 'tokenlens/helpers';
-import type { ModelCatalog } from 'tokenlens/core';
-import type { AppUsage } from '@/lib/usage';
+import { postRequestBodySchema, type PostRequestBody } from './schema';
 
 export const maxDuration = 60;
 
-let globalStreamContext: ResumableStreamContext | null = null;
-
-const getTokenlensCatalog = cache(
-  async (): Promise<ModelCatalog | undefined> => {
-    try {
-      return await fetchModels();
-    } catch (err) {
-      console.warn(
-        'TokenLens: catalog fetch failed, using default catalog',
-        err,
-      );
-      return undefined; // tokenlens helpers will fall back to defaultCatalog
-    }
-  },
-  ['tokenlens-catalog'],
-  { revalidate: 24 * 60 * 60 }, // 24 hours
-);
-
-export function getStreamContext() {
-  if (!globalStreamContext) {
-    try {
-      globalStreamContext = createResumableStreamContext({
-        waitUntil: after,
-      });
-    } catch (error: any) {
-      if (error.message.includes('REDIS_URL')) {
-        console.log(
-          ' > Resumable streams are disabled due to missing REDIS_URL',
-        );
-      } else {
-        console.error(error);
-      }
-    }
-  }
-
-  return globalStreamContext;
-}
+const AWS_ENDPOINT = 'https://hx3yxzfe18.execute-api.us-east-1.amazonaws.com/prod/sllm-class101';
 
 export async function POST(request: Request) {
   let requestBody: PostRequestBody;
@@ -106,183 +40,77 @@ export async function POST(request: Request) {
       selectedVisibilityType: VisibilityType;
     } = requestBody;
 
-    // Auth removed - all users can access
-    const userId = generateUUID(); // Generate a unique ID for anonymous users
-    const userType = 'regular';
+    // Generate a unique ID for anonymous users
+    const userId = generateUUID();
 
-    // Skip message count check for anonymous users
-    const messageCount = 0;
-
-    if (messageCount > entitlementsByUserType['regular' as keyof typeof entitlementsByUserType].maxMessagesPerDay) {
-      return new ChatSDKError('rate_limit:chat').toResponse();
-    }
+    // Get the last user message
+    const lastUserMessage = message.parts
+      .filter(part => part.type === 'text')
+      .map(part => part.text)
+      .join(' ');
 
     const chat = await getChatById({ id });
 
     if (!chat) {
-      const title = await generateTitleFromUserMessage({
-        message,
-      });
-
-      await saveChat({
-        id,
-        userId,
-        title,
-        visibility: selectedVisibilityType,
-      });
-    } else {
-      // Skip ownership check for anonymous users
+      // Skip saving chat - no database setup
+      console.log('Skipping chat save - no user in database');
     }
 
     const messagesFromDb = await getMessagesByChatId({ id });
     const uiMessages = [...convertToUIMessages(messagesFromDb), message];
 
-    const { longitude, latitude, city, country } = geolocation(request);
+    // Skip saving messages - no database setup
+    console.log('Skipping message save - no database setup');
 
-    const requestHints: RequestHints = {
-      longitude,
-      latitude,
-      city,
-      country,
-    };
-
-    await saveMessages({
-      messages: [
-        {
-          chatId: id,
-          id: message.id,
-          role: 'user',
-          parts: message.parts,
-          attachments: [],
-          createdAt: new Date(),
-        },
-      ],
+    // Call AWS endpoint
+    const awsResponse = await fetch(AWS_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: lastUserMessage,
+      }),
     });
 
-    const streamId = generateUUID();
-    await createStreamId({ streamId, chatId: id });
-
-    let finalMergedUsage: AppUsage | undefined;
-
-    const stream = createUIMessageStream({
-      execute: ({ writer: dataStream }) => {
-        const result = streamText({
-          model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel, requestHints }),
-          messages: convertToModelMessages(uiMessages),
-          stopWhen: stepCountIs(5),
-          experimental_activeTools:
-            selectedChatModel === 'chat-model-reasoning'
-              ? []
-              : [
-                  'getWeather',
-                  'createDocument',
-                  'updateDocument',
-                  'requestSuggestions',
-                ],
-          experimental_transform: smoothStream({ chunking: 'word' }),
-          tools: {
-            getWeather,
-            createDocument: createDocument({ session: null, dataStream }),
-            updateDocument: updateDocument({ session: null, dataStream }),
-            requestSuggestions: requestSuggestions({
-              session: null,
-              dataStream,
-            }),
-          },
-          experimental_telemetry: {
-            isEnabled: isProductionEnvironment,
-            functionId: 'stream-text',
-          },
-          onFinish: async ({ usage }) => {
-            try {
-              const providers = await getTokenlensCatalog();
-              const modelId =
-                myProvider.languageModel(selectedChatModel).modelId;
-              if (!modelId) {
-                finalMergedUsage = usage;
-                dataStream.write({ type: 'data-usage', data: finalMergedUsage });
-                return;
-              }
-
-              if (!providers) {
-                finalMergedUsage = usage;
-                dataStream.write({ type: 'data-usage', data: finalMergedUsage });
-                return;
-              }
-
-              const summary = getUsage({ modelId, usage, providers });
-              finalMergedUsage = { ...usage, ...summary, modelId } as AppUsage;
-              dataStream.write({ type: 'data-usage', data: finalMergedUsage });
-            } catch (err) {
-              console.warn('TokenLens enrichment failed', err);
-              finalMergedUsage = usage;
-              dataStream.write({ type: 'data-usage', data: finalMergedUsage });
-            }
-          },
-        });
-
-        result.consumeStream();
-
-        dataStream.merge(
-          result.toUIMessageStream({
-            sendReasoning: true,
-          }),
-        );
-      },
-      generateId: generateUUID,
-      onFinish: async ({ messages }) => {
-        await saveMessages({
-          messages: messages.map((message) => ({
-            id: message.id,
-            role: message.role,
-            parts: message.parts,
-            createdAt: new Date(),
-            attachments: [],
-            chatId: id,
-          })),
-        });
-
-        if (finalMergedUsage) {
-          try {
-            await updateChatLastContextById({
-              chatId: id,
-              context: finalMergedUsage,
-            });
-          } catch (err) {
-            console.warn('Unable to persist last usage for chat', id, err);
-          }
-        }
-      },
-      onError: () => {
-        return 'Oops, an error occurred!';
-      },
-    });
-
-    const streamContext = getStreamContext();
-
-    if (streamContext) {
-      return new Response(
-        await streamContext.resumableStream(streamId, () =>
-          stream.pipeThrough(new JsonToSseTransformStream()),
-        ),
-      );
-    } else {
-      return new Response(stream.pipeThrough(new JsonToSseTransformStream()));
+    if (!awsResponse.ok) {
+      throw new Error(`AWS API error: ${awsResponse.status}`);
     }
+
+    const awsData = await awsResponse.json();
+    const assistantMessage = awsData.response || awsData.message || 'No response from AI';
+
+    // Skip saving assistant message - no database setup
+    console.log('Skipping assistant message save - no database setup');
+
+    // Create a simple readable stream that sends the text
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(assistantMessage);
+        controller.close();
+      },
+    });
+
+    // Convert to SSE format manually
+    const encoder = new TextEncoder();
+    const sseStream = new ReadableStream({
+      start(controller) {
+        // Send as a single text event
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(assistantMessage)}\n\n`));
+        controller.close();
+      },
+    });
+
+    return new Response(sseStream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
   } catch (error) {
     if (error instanceof ChatSDKError) {
       return error.toResponse();
-    }
-
-    // Check for Vercel AI Gateway credit card error
-    if (
-      error instanceof Error &&
-      error.message?.includes(
-        'AI Gateway requires a valid credit card on file to service requests',
-      )
-    ) {
-      return new ChatSDKError('bad_request:activate_gateway').toResponse();
     }
 
     console.error('Unhandled error in chat API:', error);
