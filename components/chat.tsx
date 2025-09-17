@@ -66,60 +66,55 @@ export function Chat({
     currentModelIdRef.current = currentModelId;
   }, [currentModelId]);
 
-  const {
-    messages,
-    setMessages,
-    sendMessage,
-    status,
-    stop,
-    regenerate,
-    resumeStream,
-  } = useChat<ChatMessage>({
-    id,
-    messages: initialMessages,
-    experimental_throttle: 100,
-    generateId: generateUUID,
-    transport: new DefaultChatTransport({
-      api: '/api/chat',
-      fetch: fetchWithErrorHandlers,
-      prepareSendMessagesRequest({ messages, id, body }) {
-        return {
-          body: {
-            id,
-            message: messages.at(-1),
-            selectedChatModel: currentModelIdRef.current,
-            selectedVisibilityType: visibilityType,
-            ...body,
-          },
-        };
-      },
-    }),
-    onData: (dataPart) => {
-      setDataStream((ds) => (ds ? [...ds, dataPart] : []));
-      if (dataPart.type === 'data-usage') setUsage(dataPart.data);
-    },
-    onFinish: () => {
-      mutate(unstable_serialize(getChatHistoryPaginationKey));
-    },
-    onError: (error) => {
-      if (error instanceof ChatSDKError) {
-        // Check if it's a credit card error
-        if (
-          error.message?.includes('AI Gateway requires a valid credit card')
-        ) {
-          setShowCreditCardAlert(true);
-        } else {
-          toast({
-            type: 'error',
-            description: error.message,
-          });
-        }
-      }
-    },
-  });
+  // Manual chat implementation
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
+  const [isLoading, setIsLoading] = useState(false);
+  const status = isLoading ? 'streaming' : 'ready';
 
-  console.log('messages:', messages);
-  console.log('status:', status);
+  const sendMessage = async (message?: any) => {
+    if (isLoading || !message) return;
+    
+    // Add ID if missing
+    const fullMessage = {
+      ...message,
+      id: message.id || generateUUID(),
+    };
+    
+    setIsLoading(true);
+    setMessages(prev => [...prev, fullMessage]);
+    
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          message: fullMessage,
+          selectedChatModel: currentModelIdRef.current,
+          selectedVisibilityType: visibilityType,
+        }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to get response');
+      
+      const assistantMessage = await response.json();
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Chat error:', error);
+      toast({
+        type: 'error',
+        description: 'Failed to send message',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Dummy functions for compatibility
+  const stop = async () => {};
+  const regenerate = async () => {};
+  const resumeStream = async () => {};
+
 
   const searchParams = useSearchParams();
   const query = searchParams.get('query');

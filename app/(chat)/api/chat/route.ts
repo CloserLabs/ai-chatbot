@@ -12,6 +12,7 @@ import type { ChatMessage } from '@/lib/types';
 import type { ChatModel } from '@/lib/ai/models';
 import type { VisibilityType } from '@/components/visibility-selector';
 import { postRequestBodySchema, type PostRequestBody } from './schema';
+import { createUIMessageStream, JsonToSseTransformStream } from 'ai';
 
 export const maxDuration = 60;
 
@@ -83,20 +84,15 @@ export async function POST(request: Request) {
     // Skip saving assistant message - no database setup
     console.log('Skipping assistant message save - no database setup');
 
-    // Return in AI SDK streaming format
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
-      start(controller) {
-        controller.enqueue(encoder.encode(`0:"${assistantMessage.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"\n`));
-        controller.enqueue(encoder.encode(`d:{"finishReason":"stop"}\n`));
-        controller.close();
-      },
-    });
-
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-      },
+    // Simple JSON response - forget streaming for now
+    return Response.json({
+      id: generateUUID(),
+      role: 'assistant',
+      parts: [{
+        type: 'text',
+        text: assistantMessage
+      }],
+      createdAt: new Date()
     });
   } catch (error) {
     if (error instanceof ChatSDKError) {
