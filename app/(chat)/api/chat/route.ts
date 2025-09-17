@@ -83,29 +83,19 @@ export async function POST(request: Request) {
     // Skip saving assistant message - no database setup
     console.log('Skipping assistant message save - no database setup');
 
-    // Create a simple readable stream that sends the text
+    // Return in AI SDK streaming format
+    const encoder = new TextEncoder();
     const stream = new ReadableStream({
       start(controller) {
-        controller.enqueue(assistantMessage);
+        controller.enqueue(encoder.encode(`0:"${assistantMessage.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"\n`));
+        controller.enqueue(encoder.encode(`d:{"finishReason":"stop"}\n`));
         controller.close();
       },
     });
 
-    // Convert to SSE format manually
-    const encoder = new TextEncoder();
-    const sseStream = new ReadableStream({
-      start(controller) {
-        // Send as a single text event
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(assistantMessage)}\n\n`));
-        controller.close();
-      },
-    });
-
-    return new Response(sseStream, {
+    return new Response(stream, {
       headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+        'Content-Type': 'text/plain; charset=utf-8',
       },
     });
   } catch (error) {
