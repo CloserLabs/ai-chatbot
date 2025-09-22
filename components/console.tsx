@@ -1,6 +1,5 @@
-import { TerminalWindowIcon, CrossSmallIcon } from './icons';
-import { Loader } from './elements/loader';
-import { Button } from './ui/button';
+import { useArtifactSelector } from '@/hooks/use-artifact'
+import { cn } from '@/lib/utils'
 import {
   type Dispatch,
   type SetStateAction,
@@ -8,74 +7,75 @@ import {
   useEffect,
   useRef,
   useState,
-} from 'react';
-import { cn } from '@/lib/utils';
-import { useArtifactSelector } from '@/hooks/use-artifact';
+} from 'react'
+import { Loader } from './elements/loader'
+import { CrossSmallIcon, TerminalWindowIcon } from './icons'
+import { Button } from './ui/button'
 
 export interface ConsoleOutputContent {
-  type: 'text' | 'image';
-  value: string;
+  type: 'text' | 'image'
+  value: string
 }
 
 export interface ConsoleOutput {
-  id: string;
-  status: 'in_progress' | 'loading_packages' | 'completed' | 'failed';
-  contents: Array<ConsoleOutputContent>;
+  id: string
+  status: 'in_progress' | 'loading_packages' | 'completed' | 'failed'
+  contents: Array<ConsoleOutputContent>
 }
 
 interface ConsoleProps {
-  consoleOutputs: Array<ConsoleOutput>;
-  setConsoleOutputs: Dispatch<SetStateAction<Array<ConsoleOutput>>>;
+  consoleOutputs: Array<ConsoleOutput>
+  setConsoleOutputs: Dispatch<SetStateAction<Array<ConsoleOutput>>>
 }
 
 export function Console({ consoleOutputs, setConsoleOutputs }: ConsoleProps) {
-  const [height, setHeight] = useState<number>(300);
-  const [isResizing, setIsResizing] = useState(false);
-  const consoleEndRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number>(300)
+  const [isResizing, setIsResizing] = useState(false)
+  const consoleEndRef = useRef<HTMLDivElement>(null)
 
-  const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
+  const isArtifactVisible = useArtifactSelector((state) => state.isVisible)
 
-  const minHeight = 100;
-  const maxHeight = 800;
+  const minHeight = 100
+  const maxHeight = 800
 
   const startResizing = useCallback(() => {
-    setIsResizing(true);
-  }, []);
+    setIsResizing(true)
+  }, [])
 
   const stopResizing = useCallback(() => {
-    setIsResizing(false);
-  }, []);
+    setIsResizing(false)
+  }, [])
 
   const resize = useCallback(
     (e: MouseEvent) => {
       if (isResizing) {
-        const newHeight = window.innerHeight - e.clientY;
+        const newHeight = window.innerHeight - e.clientY
         if (newHeight >= minHeight && newHeight <= maxHeight) {
-          setHeight(newHeight);
+          setHeight(newHeight)
         }
       }
     },
     [isResizing],
-  );
+  )
 
   useEffect(() => {
-    window.addEventListener('mousemove', resize);
-    window.addEventListener('mouseup', stopResizing);
+    window.addEventListener('mousemove', resize)
+    window.addEventListener('mouseup', stopResizing)
     return () => {
-      window.removeEventListener('mousemove', resize);
-      window.removeEventListener('mouseup', stopResizing);
-    };
-  }, [resize, stopResizing]);
+      window.removeEventListener('mousemove', resize)
+      window.removeEventListener('mouseup', stopResizing)
+    }
+  }, [resize, stopResizing])
 
   useEffect(() => {
-    consoleEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [consoleOutputs]);
+    consoleEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [consoleOutputs])
 
   useEffect(() => {
     if (!isArtifactVisible) {
-      setConsoleOutputs([]);
+      setConsoleOutputs([])
     }
-  }, [isArtifactVisible, setConsoleOutputs]);
+  }, [isArtifactVisible, setConsoleOutputs])
 
   return consoleOutputs.length > 0 ? (
     <>
@@ -176,5 +176,5 @@ export function Console({ consoleOutputs, setConsoleOutputs }: ConsoleProps) {
         </div>
       </div>
     </>
-  ) : null;
+  ) : null
 }

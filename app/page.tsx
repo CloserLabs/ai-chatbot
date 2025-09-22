@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 const NAV_ITEMS = [
   { name: 'S-LLM', href: '/chat' },
-  { name: '의사결정', href: '/price' },
+  { name: '의사결정', href: '/decision' },
 ]
 
 export default function Page() {
