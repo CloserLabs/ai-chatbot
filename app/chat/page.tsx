@@ -1,16 +1,15 @@
-import { cookies } from 'next/headers';
+import { cookies } from 'next/headers'
 
-import { Chat } from '@/components/chat';
-import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
-import { generateUUID } from '@/lib/utils';
-import { DataStreamHandler } from '@/components/data-stream-handler';
+import { Chat } from '@/components/chat'
+import { DataStreamHandler } from '@/components/data-stream-handler'
+import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models'
+import { generateUUID } from '@/lib/utils'
 
 export default async function Page() {
+  const id = generateUUID()
 
-  const id = generateUUID();
-
-  const cookieStore = await cookies();
-  const modelIdFromCookie = cookieStore.get('chat-model');
+  const cookieStore = await cookies()
+  const modelIdFromCookie = cookieStore.get('chat-model')
 
   if (!modelIdFromCookie) {
     return (
@@ -25,7 +24,7 @@ export default async function Page() {
         />
         <DataStreamHandler />
       </>
-    );
+    )
   }
 
   return (
@@ -40,5 +39,5 @@ export default async function Page() {
       />
       <DataStreamHandler />
     </>
-  );
+  )
 }

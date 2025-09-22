@@ -1,51 +1,51 @@
-'use client';
+'use client'
 
-import type { UIMessage } from 'ai';
+import type { UIMessage } from 'ai'
 import {
-  useRef,
-  useEffect,
-  useState,
+  memo,
   useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
   type Dispatch,
   type SetStateAction,
-  type ChangeEvent,
-  memo,
-  useMemo,
-} from 'react';
-import { toast } from 'sonner';
-import { useLocalStorage, useWindowSize } from 'usehooks-ts';
+} from 'react'
+import { toast } from 'sonner'
+import { useLocalStorage, useWindowSize } from 'usehooks-ts'
 
-import {
-  ArrowUpIcon,
-  PaperclipIcon,
-  CpuIcon,
-  StopIcon,
-  ChevronDownIcon,
-} from './icons';
-import { PreviewAttachment } from './preview-attachment';
-import { Button } from './ui/button';
-import { SuggestedActions } from './suggested-actions';
+import { saveChatModelAsCookie } from '@/app/chat/(chat)/actions'
+import { SelectItem } from '@/components/ui/select'
+import { chatModels } from '@/lib/ai/models'
+import { myProvider } from '@/lib/ai/providers'
+import type { Attachment, ChatMessage } from '@/lib/types'
+import type { AppUsage } from '@/lib/usage'
+import type { UseChatHelpers } from '@ai-sdk/react'
+import * as SelectPrimitive from '@radix-ui/react-select'
+import equal from 'fast-deep-equal'
+import { startTransition } from 'react'
+import { Context } from './elements/context'
 import {
   PromptInput,
+  PromptInputModelSelect,
+  PromptInputModelSelectContent,
+  PromptInputSubmit,
   PromptInputTextarea,
   PromptInputToolbar,
   PromptInputTools,
-  PromptInputSubmit,
-  PromptInputModelSelect,
-  PromptInputModelSelectContent,
-} from './elements/prompt-input';
-import { SelectItem } from '@/components/ui/select';
-import * as SelectPrimitive from '@radix-ui/react-select';
-import equal from 'fast-deep-equal';
-import type { UseChatHelpers } from '@ai-sdk/react';
-import type { VisibilityType } from './visibility-selector';
-import type { Attachment, ChatMessage } from '@/lib/types';
-import type { AppUsage } from '@/lib/usage';
-import { chatModels } from '@/lib/ai/models';
-import { saveChatModelAsCookie } from '@/app/(chat)/actions';
-import { startTransition } from 'react';
-import { Context } from './elements/context';
-import { myProvider } from '@/lib/ai/providers';
+} from './elements/prompt-input'
+import {
+  ArrowUpIcon,
+  ChevronDownIcon,
+  CpuIcon,
+  PaperclipIcon,
+  StopIcon,
+} from './icons'
+import { PreviewAttachment } from './preview-attachment'
+import { SuggestedActions } from './suggested-actions'
+import { Button } from './ui/button'
+import type { VisibilityType } from './visibility-selector'
 
 function PureMultimodalInput({
   chatId,
@@ -64,73 +64,70 @@ function PureMultimodalInput({
   onModelChange,
   usage,
 }: {
-  chatId: string;
-  input: string;
-  setInput: Dispatch<SetStateAction<string>>;
-  status: UseChatHelpers<ChatMessage>['status'];
-  stop: () => void;
-  attachments: Array<Attachment>;
-  setAttachments: Dispatch<SetStateAction<Array<Attachment>>>;
-  messages: Array<UIMessage>;
-  setMessages: UseChatHelpers<ChatMessage>['setMessages'];
-  sendMessage: UseChatHelpers<ChatMessage>['sendMessage'];
-  className?: string;
-  selectedVisibilityType: VisibilityType;
-  selectedModelId: string;
-  onModelChange?: (modelId: string) => void;
-  usage?: AppUsage;
+  chatId: string
+  input: string
+  setInput: Dispatch<SetStateAction<string>>
+  status: UseChatHelpers<ChatMessage>['status']
+  stop: () => void
+  attachments: Array<Attachment>
+  setAttachments: Dispatch<SetStateAction<Array<Attachment>>>
+  messages: Array<UIMessage>
+  setMessages: UseChatHelpers<ChatMessage>['setMessages']
+  sendMessage: UseChatHelpers<ChatMessage>['sendMessage']
+  className?: string
+  selectedVisibilityType: VisibilityType
+  selectedModelId: string
+  onModelChange?: (modelId: string) => void
+  usage?: AppUsage
 }) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { width } = useWindowSize();
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const { width } = useWindowSize()
 
   useEffect(() => {
     if (textareaRef.current) {
-      adjustHeight();
+      adjustHeight()
     }
-  }, []);
+  }, [])
 
   const adjustHeight = () => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = '44px';
+      textareaRef.current.style.height = '44px'
     }
-  };
+  }
 
   const resetHeight = () => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = '44px';
+      textareaRef.current.style.height = '44px'
     }
-  };
+  }
 
-  const [localStorageInput, setLocalStorageInput] = useLocalStorage(
-    'input',
-    '',
-  );
+  const [localStorageInput, setLocalStorageInput] = useLocalStorage('input', '')
 
   useEffect(() => {
     if (textareaRef.current) {
-      const domValue = textareaRef.current.value;
+      const domValue = textareaRef.current.value
       // Prefer DOM value over localStorage to handle hydration
-      const finalValue = domValue || localStorageInput || '';
-      setInput(finalValue);
-      adjustHeight();
+      const finalValue = domValue || localStorageInput || ''
+      setInput(finalValue)
+      adjustHeight()
     }
     // Only run once after hydration
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
   useEffect(() => {
-    setLocalStorageInput(input);
-  }, [input, setLocalStorageInput]);
+    setLocalStorageInput(input)
+  }, [input, setLocalStorageInput])
 
   const handleInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(event.target.value);
-  };
+    setInput(event.target.value)
+  }
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadQueue, setUploadQueue] = useState<Array<string>>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploadQueue, setUploadQueue] = useState<Array<string>>([])
 
   const submitForm = useCallback(() => {
-    window.history.replaceState({}, '', `/chat/${chatId}`);
+    window.history.replaceState({}, '', `/chat/${chatId}`)
 
     sendMessage({
       role: 'user',
@@ -146,15 +143,15 @@ function PureMultimodalInput({
           text: input,
         },
       ],
-    });
+    })
 
-    setAttachments([]);
-    setLocalStorageInput('');
-    resetHeight();
-    setInput('');
+    setAttachments([])
+    setLocalStorageInput('')
+    resetHeight()
+    setInput('')
 
     if (width && width > 768) {
-      textareaRef.current?.focus();
+      textareaRef.current?.focus()
     }
   }, [
     input,
@@ -165,75 +162,74 @@ function PureMultimodalInput({
     setLocalStorageInput,
     width,
     chatId,
-  ]);
+  ])
 
   const uploadFile = async (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
+    const formData = new FormData()
+    formData.append('file', file)
 
     try {
       const response = await fetch('/api/files/upload', {
         method: 'POST',
         body: formData,
-      });
+      })
 
       if (response.ok) {
-        const data = await response.json();
-        const { url, pathname, contentType } = data;
+        const data = await response.json()
+        const { url, pathname, contentType } = data
 
         return {
           url,
           name: pathname,
           contentType: contentType,
-        };
+        }
       }
-      const { error } = await response.json();
-      toast.error(error);
+      const { error } = await response.json()
+      toast.error(error)
     } catch (error) {
-      toast.error('Failed to upload file, please try again!');
+      toast.error('Failed to upload file, please try again!')
     }
-  };
+  }
 
   const modelResolver = useMemo(() => {
-    return myProvider.languageModel(selectedModelId);
-  }, [selectedModelId]);
+    return myProvider.languageModel(selectedModelId)
+  }, [selectedModelId])
 
   const contextProps = useMemo(
     () => ({
       usage,
     }),
     [usage],
-  );
+  )
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(event.target.files || []);
+      const files = Array.from(event.target.files || [])
 
-      setUploadQueue(files.map((file) => file.name));
+      setUploadQueue(files.map((file) => file.name))
 
       try {
-        const uploadPromises = files.map((file) => uploadFile(file));
-        const uploadedAttachments = await Promise.all(uploadPromises);
+        const uploadPromises = files.map((file) => uploadFile(file))
+        const uploadedAttachments = await Promise.all(uploadPromises)
         const successfullyUploadedAttachments = uploadedAttachments.filter(
           (attachment) => attachment !== undefined,
-        );
+        )
 
         setAttachments((currentAttachments) => [
           ...currentAttachments,
           ...successfullyUploadedAttachments,
-        ]);
+        ])
       } catch (error) {
-        console.error('Error uploading files!', error);
+        console.error('Error uploading files!', error)
       } finally {
-        setUploadQueue([]);
+        setUploadQueue([])
       }
     },
     [setAttachments],
-  );
+  )
 
   return (
     <div className="flex relative flex-col gap-4 w-full">
-
       {messages.length === 0 &&
         attachments.length === 0 &&
         uploadQueue.length === 0 && (
@@ -256,11 +252,11 @@ function PureMultimodalInput({
       <PromptInput
         className="p-3 rounded-xl border transition-all duration-200 border-border bg-background shadow-xs focus-within:border-border hover:border-muted-foreground/50"
         onSubmit={(event) => {
-          event.preventDefault();
+          event.preventDefault()
           if (status !== 'ready') {
-            toast.error('Please wait for the model to finish its response!');
+            toast.error('Please wait for the model to finish its response!')
           } else {
-            submitForm();
+            submitForm()
           }
         }}
       >
@@ -276,9 +272,9 @@ function PureMultimodalInput({
                 onRemove={() => {
                   setAttachments((currentAttachments) =>
                     currentAttachments.filter((a) => a.url !== attachment.url),
-                  );
+                  )
                   if (fileInputRef.current) {
-                    fileInputRef.current.value = '';
+                    fileInputRef.current.value = ''
                   }
                 }}
               />
@@ -320,7 +316,10 @@ function PureMultimodalInput({
               status={status}
               selectedModelId={selectedModelId}
             />
-            <ModelSelectorCompact selectedModelId={selectedModelId} onModelChange={onModelChange} />
+            <ModelSelectorCompact
+              selectedModelId={selectedModelId}
+              onModelChange={onModelChange}
+            />
           </PromptInputTools>
 
           {status === 'submitted' ? (
@@ -337,80 +336,80 @@ function PureMultimodalInput({
         </PromptInputToolbar>
       </PromptInput>
     </div>
-  );
+  )
 }
 
 export const MultimodalInput = memo(
   PureMultimodalInput,
   (prevProps, nextProps) => {
-    if (prevProps.input !== nextProps.input) return false;
-    if (prevProps.status !== nextProps.status) return false;
-    if (!equal(prevProps.attachments, nextProps.attachments)) return false;
+    if (prevProps.input !== nextProps.input) return false
+    if (prevProps.status !== nextProps.status) return false
+    if (!equal(prevProps.attachments, nextProps.attachments)) return false
     if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType)
-      return false;
-    if (prevProps.selectedModelId !== nextProps.selectedModelId) return false;
+      return false
+    if (prevProps.selectedModelId !== nextProps.selectedModelId) return false
 
-    return true;
+    return true
   },
-);
+)
 
 function PureAttachmentsButton({
   fileInputRef,
   status,
   selectedModelId,
 }: {
-  fileInputRef: React.MutableRefObject<HTMLInputElement | null>;
-  status: UseChatHelpers<ChatMessage>['status'];
-  selectedModelId: string;
+  fileInputRef: React.MutableRefObject<HTMLInputElement | null>
+  status: UseChatHelpers<ChatMessage>['status']
+  selectedModelId: string
 }) {
-  const isReasoningModel = selectedModelId === 'chat-model-reasoning';
+  const isReasoningModel = selectedModelId === 'chat-model-reasoning'
 
   return (
     <Button
       data-testid="attachments-button"
       className="p-1 h-8 rounded-lg transition-colors aspect-square hover:bg-accent"
       onClick={(event) => {
-        event.preventDefault();
-        fileInputRef.current?.click();
+        event.preventDefault()
+        fileInputRef.current?.click()
       }}
       disabled={status !== 'ready' || isReasoningModel}
       variant="ghost"
     >
       <PaperclipIcon size={14} style={{ width: 14, height: 14 }} />
     </Button>
-  );
+  )
 }
 
-const AttachmentsButton = memo(PureAttachmentsButton);
+const AttachmentsButton = memo(PureAttachmentsButton)
 
 function PureModelSelectorCompact({
   selectedModelId,
   onModelChange,
 }: {
-  selectedModelId: string;
-  onModelChange?: (modelId: string) => void;
+  selectedModelId: string
+  onModelChange?: (modelId: string) => void
 }) {
-  const [optimisticModelId, setOptimisticModelId] = useState(selectedModelId);
+  const [optimisticModelId, setOptimisticModelId] = useState(selectedModelId)
 
   useEffect(() => {
-    setOptimisticModelId(selectedModelId);
-  }, [selectedModelId]);
+    setOptimisticModelId(selectedModelId)
+  }, [selectedModelId])
 
   const selectedModel = chatModels.find(
     (model) => model.id === optimisticModelId,
-  );
+  )
 
   return (
     <PromptInputModelSelect
       value={selectedModel?.name}
       onValueChange={(modelName) => {
-        const model = chatModels.find((m) => m.name === modelName);
+        const model = chatModels.find((m) => m.name === modelName)
         if (model) {
-          setOptimisticModelId(model.id);
-          onModelChange?.(model.id);
+          setOptimisticModelId(model.id)
+          onModelChange?.(model.id)
           startTransition(() => {
-            saveChatModelAsCookie(model.id);
-          });
+            saveChatModelAsCookie(model.id)
+          })
         }
       }}
     >
@@ -443,31 +442,31 @@ function PureModelSelectorCompact({
         </div>
       </PromptInputModelSelectContent>
     </PromptInputModelSelect>
-  );
+  )
 }
 
-const ModelSelectorCompact = memo(PureModelSelectorCompact);
+const ModelSelectorCompact = memo(PureModelSelectorCompact)
 
 function PureStopButton({
   stop,
   setMessages,
 }: {
-  stop: () => void;
-  setMessages: UseChatHelpers<ChatMessage>['setMessages'];
+  stop: () => void
+  setMessages: UseChatHelpers<ChatMessage>['setMessages']
 }) {
   return (
     <Button
       data-testid="stop-button"
       className="p-1 rounded-full transition-colors duration-200 size-7 bg-foreground text-background hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground"
       onClick={(event) => {
-        event.preventDefault();
-        stop();
-        setMessages((messages) => messages);
+        event.preventDefault()
+        stop()
+        setMessages((messages) => messages)
       }}
     >
       <StopIcon size={14} />
     </Button>
-  );
+  )
 }
 
-const StopButton = memo(PureStopButton);
+const StopButton = memo(PureStopButton)

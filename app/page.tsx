@@ -2,21 +2,19 @@ import { Card } from '@/components/ui/card'
 
 import Link from 'next/link'
 
-export default function Page() {
-  const navItems = [
-    { name: 'chat', href: '/chat' },
-    { name: 'sllm', href: '/sllm' },
-    { name: 'price', href: '/price' },
-    { name: 'brand', href: '/brand' },
-  ]
+const NAV_ITEMS = [
+  { name: 'S-LLM', href: '/chat' },
+  { name: '의사결정', href: '/price' },
+]
 
+export default function Page() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <nav>
         <ul className="flex flex-col gap-4">
-          {navItems.map((item) => (
+          {NAV_ITEMS.map((item) => (
             <li key={item.name}>
-              <Link href={item.href} className="text-lg">
+              <Link href={item.href} className="font-medium text-lg">
                 <Card className="p-4 hover:bg-gray-500">{item.name}</Card>
               </Link>
             </li>
