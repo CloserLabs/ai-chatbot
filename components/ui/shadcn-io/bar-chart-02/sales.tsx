@@ -17,33 +17,28 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart'
 
-export const description = 'A bar chart'
-
 const chartData = [
-  { day: '1일', coupang: 4500, naver: 3200, ownmall: 800, inventory: 85 },
-  { day: '2일', coupang: 4800, naver: 3500, ownmall: 950, inventory: 82 },
-  { day: '3일', coupang: 4200, naver: 3100, ownmall: 700, inventory: 78 },
-  { day: '4일', coupang: 5100, naver: 3800, ownmall: 1100, inventory: 75 },
-  { day: '5일', coupang: 5300, naver: 3600, ownmall: 900, inventory: 72 },
-  { day: '6일', coupang: 5880, naver: 4080, ownmall: 1080, inventory: 68 },
-  { day: '7일', coupang: 6600, naver: 4680, ownmall: 1440, inventory: 65 },
-  { day: '8일', coupang: 4800, naver: 3400, ownmall: 850, inventory: 62 },
-  { day: '9일', coupang: 5200, naver: 3700, ownmall: 1000, inventory: 58 },
-  { day: '10일', coupang: 4600, naver: 3300, ownmall: 800, inventory: 55 },
-  { day: '11일', coupang: 5100, naver: 3500, ownmall: 950, inventory: 52 },
-  { day: '12일', coupang: 5400, naver: 3800, ownmall: 1100, inventory: 48 },
-  { day: '13일', coupang: 5640, naver: 3960, ownmall: 1080, inventory: 45 },
-  { day: '14일', coupang: 7080, naver: 5040, ownmall: 1680, inventory: 42 },
-  { day: '15일', coupang: 5200, naver: 3700, ownmall: 900, inventory: 38 },
-  { day: '16일', coupang: 5700, naver: 4000, ownmall: 1200, inventory: 35 },
-  { day: '17일', coupang: 5300, naver: 3700, ownmall: 1050, inventory: 32 },
-  { day: '18일', coupang: 5500, naver: 3900, ownmall: 1150, inventory: 30 },
-  { day: '19일', coupang: 5000, naver: 3600, ownmall: 950, inventory: 28 },
-  { day: '20일', coupang: 6960, naver: 4920, ownmall: 1560, inventory: 25 },
-  { day: '21일', coupang: 7200, naver: 5160, ownmall: 1680, inventory: 22 },
-  { day: '22일', coupang: 4700, naver: 3300, ownmall: 850, inventory: 20 },
-  { day: '23일', coupang: 5400, naver: 3800, ownmall: 1100, inventory: 18 },
-  { day: '24일', coupang: 5200, naver: 3600, ownmall: 1000, inventory: 15 },
+  { day: '1일', coupang: 7500, naver: 3800, ownmall: 950, inventory: 55 },
+  { day: '2일', coupang: 7800, naver: 4100, ownmall: 1100, inventory: 52 },
+  { day: '3일', coupang: 7200, naver: 3600, ownmall: 850, inventory: 58 },
+  { day: '4일', coupang: 7100, naver: 4300, ownmall: 1250, inventory: 55 },
+  { day: '5일', coupang: 7300, naver: 4400, ownmall: 1050, inventory: 52 },
+  { day: '6일', coupang: 7880, naver: 4800, ownmall: 1280, inventory: 58 },
+  { day: '7일', coupang: 8600, naver: 5300, ownmall: 1640, inventory: 55 },
+  { day: '8일', coupang: 6800, naver: 4100, ownmall: 1000, inventory: 52 },
+  { day: '9일', coupang: 7200, naver: 4300, ownmall: 1150, inventory: 58 },
+  { day: '10일', coupang: 6600, naver: 3900, ownmall: 950, inventory: 55 },
+  { day: '11일', coupang: 7100, naver: 4200, ownmall: 1100, inventory: 52 },
+  { day: '12일', coupang: 7400, naver: 4500, ownmall: 1250, inventory: 58 },
+  { day: '13일', coupang: 7640, naver: 4650, ownmall: 1280, inventory: 55 },
+  { day: '14일', coupang: 9080, naver: 5650, ownmall: 1880, inventory: 52 },
+  { day: '15일', coupang: 5200, naver: 3350, ownmall: 1050, inventory: 58 },
+  { day: '16일', coupang: 5700, naver: 3700, ownmall: 1400, inventory: 55 },
+  { day: '17일', coupang: 5300, naver: 3400, ownmall: 1200, inventory: 52 },
+  { day: '18일', coupang: 6200, naver: 3200, ownmall: 1400, inventory: 60 },
+  { day: '19일', coupang: 5500, naver: 3800, ownmall: 1100, inventory: 62 },
+  { day: '20일', coupang: 5300, naver: 3900, ownmall: 1000, inventory: 66 },
+  { day: '21일', coupang: 7100, naver: 3600, ownmall: 1250, inventory: 72 },
 ]
 
 const chartConfig = {
@@ -67,15 +62,15 @@ const chartConfig = {
 
 export function SalesChartBar() {
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="flex flex-col gap-1 pb-4 pt-2 mb-4 border-b">
-        <h3 className="text-lg font-semibold mx-auto">일별 판매량 & 재고율</h3>
-        <p className="text-sm text-muted-foreground mx-auto">
-          최근 24일간 채널별 판매 현황
+    <div className='flex h-full w-full flex-col'>
+      <div className='mb-4 flex flex-col gap-1 border-b pt-2 pb-4'>
+        <h3 className='mx-auto font-semibold text-lg'>일별 판매량 & 재고율</h3>
+        <p className='mx-auto text-muted-foreground text-sm'>
+          최근 {chartData.length}일간 채널별 판매 현황
         </p>
       </div>
 
-      <div className="flex-1 flex items-center justify-center min-h-0">
+      <div className='flex min-h-0 flex-1 items-center justify-center'>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <ComposedChart accessibilityLayer data={chartData}>
             <CartesianGrid vertical={false} />
@@ -130,7 +125,7 @@ export function SalesChartBar() {
               dataKey="ownmall"
               stackId="a"
               fill="var(--color-ownmall)"
-              radius={[8, 8, 0, 0]}
+              radius={[4, 4, 0, 0]}
             />
             <Line
               yAxisId="right"

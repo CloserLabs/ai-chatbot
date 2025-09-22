@@ -26,10 +26,10 @@ const salesData = [
 
 export function DataTables() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-medium">
+          <CardTitle className='font-medium text-base'>
             매출이 감소한 SKU Top 5
           </CardTitle>
         </CardHeader>
@@ -55,7 +55,7 @@ export function DataTables() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-medium">
+          <CardTitle className='font-medium text-base'>
             예상 판매량이 높아진 경쟁사 제품
           </CardTitle>
         </CardHeader>

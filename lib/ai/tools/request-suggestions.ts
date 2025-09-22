@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { streamObject, tool, type UIMessageStreamWriter } from 'ai';
-import { getDocumentById, saveSuggestions } from '@/lib/db/queries';
+import { getDocumentById, } from '@/lib/db/queries';
 import type { Suggestion } from '@/lib/db/schema';
 import { generateUUID } from '@/lib/utils';
 import { myProvider } from '../providers';

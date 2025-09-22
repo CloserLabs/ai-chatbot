@@ -21,11 +21,11 @@ const chartData = [
 
 export function TrendCharts() {
   return (
-    <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
+    <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
       {chartData.map((chart) => (
         <Card key={chart.title} className="bg-white">
           <CardHeader className="pb-2">
-            <CardTitle className="text-center text-sm font-medium">
+            <CardTitle className='text-center font-medium text-sm'>
               {chart.title}
             </CardTitle>
             <p className="text-center text-gray-500 text-xs">
@@ -33,9 +33,9 @@ export function TrendCharts() {
             </p>
           </CardHeader>
           <CardContent className="pt-4">
-            <div className="flex h-32 items-center justify-center relative">
+            <div className='relative flex h-32 items-center justify-center'>
               {/* Simple trend visualization */}
-              <div className="h-20 relative w-full">
+              <div className='relative h-20 w-full'>
                 <svg className="h-full w-full" viewBox="0 0 200 80">
                   <polyline
                     fill="none"
@@ -48,7 +48,7 @@ export function TrendCharts() {
                     }
                   />
                 </svg>
-                <TrendingUp className="absolute bottom-2 h-6 right-2 text-blue-600 w-6" />
+                <TrendingUp className='absolute right-2 bottom-2 h-6 w-6 text-blue-600' />
               </div>
             </div>
           </CardContent>

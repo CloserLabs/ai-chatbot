@@ -8,7 +8,7 @@ export default function Page() {
     <div className="p-4">
       <StatsHeader />
 
-      <div className="flex flex-col gap-4 mt-6">
+      <div className='mt-6 flex flex-col gap-4'>
         <Card className="w-full">
           <CardContent className="p-0">
             <SalesChartBar />

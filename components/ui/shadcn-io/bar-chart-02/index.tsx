@@ -63,17 +63,17 @@ const chartConfig = {
 
 export function ChartBarDefault() {
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="flex flex-col gap-1 pb-4 pt-2 mb-4 border-b">
-        <h3 className="text-lg font-semibold mx-auto">
+    <div className='flex h-full w-full flex-col'>
+      <div className='mb-4 flex flex-col gap-1 border-b pt-2 pb-4'>
+        <h3 className='mx-auto font-semibold text-lg'>
           주문량 & 판매량 & 재고율
         </h3>
-        <p className="text-sm text-muted-foreground mx-auto">
+        <p className='mx-auto text-muted-foreground text-sm'>
           오늘 하루 판매량 (5am - 4am)
         </p>
       </div>
 
-      <div className="flex-1 flex items-center justify-center min-h-0">
+      <div className='flex min-h-0 flex-1 items-center justify-center'>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <ComposedChart accessibilityLayer data={chartData}>
             <CartesianGrid vertical={false} />

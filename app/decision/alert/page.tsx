@@ -14,8 +14,8 @@ export default function Page() {
         <Card className="w-full">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 text-blue-600 w-5" />
-              <CardTitle className="text-lg font-semibold">
+              <TrendingUp className='h-5 w-5 text-blue-600' />
+              <CardTitle className='font-semibold text-lg'>
                 데스크톱 추천 의사결정
               </CardTitle>
             </div>

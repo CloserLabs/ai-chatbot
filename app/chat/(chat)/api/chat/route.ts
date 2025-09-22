@@ -2,17 +2,13 @@ import {
   deleteChatById,
   getChatById,
   getMessagesByChatId,
-  saveChat,
-  saveMessages,
 } from '@/lib/db/queries';
 import { convertToUIMessages, generateUUID } from '@/lib/utils';
-import { generateTitleFromUserMessage } from '../../actions';
 import { ChatSDKError } from '@/lib/errors';
 import type { ChatMessage } from '@/lib/types';
 import type { ChatModel } from '@/lib/ai/models';
 import type { VisibilityType } from '@/components/visibility-selector';
 import { postRequestBodySchema, type PostRequestBody } from './schema';
-import { createUIMessageStream, JsonToSseTransformStream } from 'ai';
 
 export const maxDuration = 60;
 
