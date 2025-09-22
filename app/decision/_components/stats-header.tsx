@@ -30,6 +30,7 @@ export function StatsHeader() {
                 <Package className="h-5 w-5 text-orange-600" />
                 <span className="text-2xl font-bold text-orange-700">28개</span>
               </div>
+
               <p className="text-sm text-orange-600">
                 의사결정 시 영향 받는 SKU 수
               </p>

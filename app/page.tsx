@@ -1,4 +1,5 @@
 import { Card } from '@/components/ui/card'
+import { Boxes } from '@/components/ui/shadcn-io/background-boxes'
 
 import Link from 'next/link'
 
@@ -9,8 +10,10 @@ const NAV_ITEMS = [
 
 export default function Page() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <nav>
+    <div className="relative flex min-h-screen items-center justify-center">
+      <Boxes className="absolute inset-0" />
+
+      <nav className="absolute z-10">
         <ul className="flex flex-col gap-4">
           {NAV_ITEMS.map((item) => (
             <li key={item.name}>
