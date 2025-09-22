@@ -104,7 +104,7 @@ export function SalesChartBar() {
               verticalAlign="bottom"
               height={32}
               iconType="rect"
-              formatter={(value) => chartConfig[value]?.label || value}
+              formatter={(value) => chartConfig[value as keyof typeof chartConfig]?.label || value}
             />
             <Bar
               yAxisId="left"
