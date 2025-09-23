@@ -1,15 +1,7 @@
 {
-  "installCommand": "pnpm install",
-  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "rm -rf .next && pnpm build",
   "devCommand": "pnpm dev",
   "outputDirectory": ".next",
-  "framework": "nextjs",
-  "env": {
-    "SKIP_DB_MIGRATE": "true"
-  },
-  "build": {
-    "env": {
-      "SKIP_DB_MIGRATE": "true"
-    }
-  }
+  "framework": "nextjs"
 }
