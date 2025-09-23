@@ -1,21 +1,19 @@
-import type { NextConfig } from 'next';
-import path from 'path';
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        hostname: 'avatar.vercel.sh',
+        hostname: "avatar.vercel.sh",
       },
     ],
   },
-  outputFileTracingRoot: path.join(__dirname),
   typescript: {
     ignoreBuildErrors: false,
   },
   eslint: {
     ignoreDuringBuilds: false,
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig
