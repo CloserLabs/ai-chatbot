@@ -1,11 +1,11 @@
-import { Card } from '@/components/ui/card'
-import { Boxes } from '@/components/ui/shadcn-io/background-boxes'
+import { Card } from "@/components/ui/card"
+import { Boxes } from "@/components/ui/shadcn-io/background-boxes"
 
-import Link from 'next/link'
+import Link from "next/link"
 
 const NAV_ITEMS = [
-  { name: 'S-LLM', href: '/chat' },
-  { name: '의사결정', href: '/decision' },
+  { name: "S-LLM", href: "/chat" },
+  { name: "의사결정", href: "/decision" },
 ]
 
 export default function Page() {
@@ -18,7 +18,7 @@ export default function Page() {
           {NAV_ITEMS.map((item) => (
             <li key={item.name}>
               <Link href={item.href} className="font-medium text-lg">
-                <Card className="p-4 hover:bg-gray-500">{item.name}</Card>
+                <Card className="p-4">{item.name}</Card>
               </Link>
             </li>
           ))}

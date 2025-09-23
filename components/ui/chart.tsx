@@ -54,10 +54,7 @@ function ChartContainer({
       <div
         data-slot="chart"
         data-chart={chartId}
-        className={cn(
-          "[&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground'#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border'#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden'#ccc']]:stroke-border [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted'#ccc']]:stroke-border flex aspect-video justify-center text-xs [&_.recharts-cartesian-grid_line[stroke= [&_.recharts-dot[stroke= [&_.recharts-polar-grid_[stroke= [&_.recharts-reference-line_[stroke= [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-hidden [&_.recharts-surface]:outline-hidden",
-          className,
-        )}
+        className={cn(className)}
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
@@ -261,11 +258,11 @@ function ChartLegendContent({
   verticalAlign = "bottom",
   nameKey,
 }: React.ComponentProps<"div"> & {
-    payload?: any[]
-    verticalAlign?: "top" | "bottom"
-    hideIcon?: boolean
-    nameKey?: string
-  }) {
+  payload?: any[]
+  verticalAlign?: "top" | "bottom"
+  hideIcon?: boolean
+  nameKey?: string
+}) {
   const { config } = useChart()
 
   if (!payload?.length) {
