@@ -1,3 +1,3 @@
 export default async function Page(props: { params: Promise<{ id: string }> }) {
-  return <></>
+  return <div>hi</div>
 }
