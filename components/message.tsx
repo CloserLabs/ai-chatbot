@@ -1,29 +1,28 @@
-'use client';
-import type { Vote } from '@/lib/db/schema';
-import type { ChatMessage } from '@/lib/types';
-import { cn, sanitizeText } from '@/lib/utils';
-import type { UseChatHelpers } from '@ai-sdk/react';
-import equal from 'fast-deep-equal';
-import { motion } from 'framer-motion';
-import { memo, useState } from 'react';
-import { useDataStream } from './data-stream-provider';
-import { DocumentToolResult } from './document';
-import { DocumentPreview } from './document-preview';
-import { MessageContent } from './elements/message';
-import { Response } from './elements/response';
+"use client"
+import type { Vote } from "@/lib/db/schema"
+import type { ChatMessage } from "@/lib/types"
+import { cn, sanitizeText } from "@/lib/utils"
+import type { UseChatHelpers } from "@ai-sdk/react"
+import equal from "fast-deep-equal"
+import { motion } from "framer-motion"
+import { memo, useState } from "react"
+import { useDataStream } from "./data-stream-provider"
+import { DocumentPreview } from "./document-preview"
+import { MessageContent } from "./elements/message"
+import { Response } from "./elements/response"
 import {
   Tool,
   ToolContent,
   ToolHeader,
   ToolInput,
   ToolOutput,
-} from './elements/tool';
-import { SparklesIcon } from './icons';
-import { MessageActions } from './message-actions';
-import { MessageEditor } from './message-editor';
-import { MessageReasoning } from './message-reasoning';
-import { PreviewAttachment } from './preview-attachment';
-import { Weather } from './weather';
+} from "./elements/tool"
+import { SparklesIcon } from "./icons"
+import { MessageActions } from "./message-actions"
+import { MessageEditor } from "./message-editor"
+import { MessageReasoning } from "./message-reasoning"
+import { PreviewAttachment } from "./preview-attachment"
+import { Weather } from "./weather"
 
 const PurePreviewMessage = ({
   chatId,
@@ -35,22 +34,22 @@ const PurePreviewMessage = ({
   requiresScrollPadding,
   isArtifactVisible,
 }: {
-  chatId: string;
-  message: ChatMessage;
-  vote: Vote | undefined;
-  isLoading: boolean;
-  setMessages: UseChatHelpers<ChatMessage>['setMessages'];
-  regenerate: UseChatHelpers<ChatMessage>['regenerate'];
-  requiresScrollPadding: boolean;
-  isArtifactVisible: boolean;
+  chatId: string
+  message: ChatMessage
+  vote: Vote | undefined
+  isLoading: boolean
+  setMessages: UseChatHelpers<ChatMessage>["setMessages"]
+  regenerate: UseChatHelpers<ChatMessage>["regenerate"]
+  requiresScrollPadding: boolean
+  isArtifactVisible: boolean
 }) => {
-  const [mode, setMode] = useState<'view' | 'edit'>('view');
+  const [mode, setMode] = useState<"view" | "edit">("view")
 
   const attachmentsFromMessage = message.parts.filter(
-    (part) => part.type === 'file',
-  );
+    (part) => part.type === "file",
+  )
 
-  useDataStream();
+  useDataStream()
 
   return (
     <motion.div
@@ -61,31 +60,31 @@ const PurePreviewMessage = ({
       data-role={message.role}
     >
       <div
-        className={cn('flex w-full items-start gap-2 md:gap-3', {
-          'justify-end': message.role === 'user' && mode !== 'edit',
-          'justify-start': message.role === 'assistant',
+        className={cn("flex w-full items-start gap-2 md:gap-3", {
+          "justify-end": message.role === "user" && mode !== "edit",
+          "justify-start": message.role === "assistant",
         })}
       >
-        {message.role === 'assistant' && (
+        {message.role === "assistant" && (
           <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
             <SparklesIcon size={14} />
           </div>
         )}
 
         <div
-          className={cn('flex flex-col', {
-            'gap-2 md:gap-4': message.parts?.some(
-              (p) => p.type === 'text' && p.text?.trim(),
+          className={cn("flex flex-col", {
+            "gap-2 md:gap-4": message.parts?.some(
+              (p) => p.type === "text" && p.text?.trim(),
             ),
-            'min-h-96': message.role === 'assistant' && requiresScrollPadding,
-            'w-full':
-              (message.role === 'assistant' &&
+            "min-h-96": message.role === "assistant" && requiresScrollPadding,
+            "w-full":
+              (message.role === "assistant" &&
                 message.parts?.some(
-                  (p) => p.type === 'text' && p.text?.trim(),
+                  (p) => p.type === "text" && p.text?.trim(),
                 )) ||
-              mode === 'edit',
-            'max-w-[calc(100%-2.5rem)] sm:max-w-[min(fit-content,80%)]':
-              message.role === 'user' && mode !== 'edit',
+              mode === "edit",
+            "max-w-[calc(100%-2.5rem)] sm:max-w-[min(fit-content,80%)]":
+              message.role === "user" && mode !== "edit",
           })}
         >
           {attachmentsFromMessage.length > 0 && (
@@ -97,7 +96,7 @@ const PurePreviewMessage = ({
                 <PreviewAttachment
                   key={attachment.url}
                   attachment={{
-                    name: attachment.filename ?? 'file',
+                    name: attachment.filename ?? "file",
                     contentType: attachment.mediaType,
                     url: attachment.url,
                   }}
@@ -107,44 +106,44 @@ const PurePreviewMessage = ({
           )}
 
           {message.parts?.map((part, index) => {
-            const { type } = part;
-            const key = `message-${message.id}-part-${index}`;
+            const { type } = part
+            const key = `message-${message.id}-part-${index}`
 
-            if (type === 'reasoning' && part.text?.trim().length > 0) {
+            if (type === "reasoning" && part.text?.trim().length > 0) {
               return (
                 <MessageReasoning
                   key={key}
                   isLoading={isLoading}
                   reasoning={part.text}
                 />
-              );
+              )
             }
 
-            if (type === 'text') {
-              if (mode === 'view') {
+            if (type === "text") {
+              if (mode === "view") {
                 return (
                   <div key={key}>
                     <MessageContent
                       data-testid="message-content"
                       className={cn({
-                        'w-fit break-words rounded-2xl px-3 py-2 text-right text-white':
-                          message.role === 'user',
-                        'bg-transparent px-0 py-0 text-left':
-                          message.role === 'assistant',
+                        "w-fit break-words rounded-2xl px-3 py-2 text-right text-white":
+                          message.role === "user",
+                        "bg-transparent px-0 py-0 text-left":
+                          message.role === "assistant",
                       })}
                       style={
-                        message.role === 'user'
-                          ? { backgroundColor: '#006cff' }
+                        message.role === "user"
+                          ? { backgroundColor: "#006cff" }
                           : undefined
                       }
                     >
                       <Response>{sanitizeText(part.text)}</Response>
                     </MessageContent>
                   </div>
-                );
+                )
               }
 
-              if (mode === 'edit') {
+              if (mode === "edit") {
                 return (
                   <div
                     key={key}
@@ -161,21 +160,21 @@ const PurePreviewMessage = ({
                       />
                     </div>
                   </div>
-                );
+                )
               }
             }
 
-            if (type === 'tool-getWeather') {
-              const { toolCallId, state } = part;
+            if (type === "tool-getWeather") {
+              const { toolCallId, state } = part
 
               return (
                 <Tool key={toolCallId} defaultOpen={true}>
                   <ToolHeader type="tool-getWeather" state={state} />
                   <ToolContent>
-                    {state === 'input-available' && (
+                    {state === "input-available" && (
                       <ToolInput input={part.input} />
                     )}
-                    {state === 'output-available' && (
+                    {state === "output-available" && (
                       <ToolOutput
                         output={<Weather weatherAtLocation={part.output} />}
                         errorText={undefined}
@@ -183,13 +182,13 @@ const PurePreviewMessage = ({
                     )}
                   </ToolContent>
                 </Tool>
-              );
+              )
             }
 
-            if (type === 'tool-createDocument') {
-              const { toolCallId } = part;
+            if (type === "tool-createDocument") {
+              const { toolCallId } = part
 
-              if (part.output && 'error' in part.output) {
+              if (part.output && "error" in part.output) {
                 return (
                   <div
                     key={toolCallId}
@@ -197,104 +196,43 @@ const PurePreviewMessage = ({
                   >
                     Error creating document: {String(part.output.error)}
                   </div>
-                );
+                )
               }
 
-              return (
-                <DocumentPreview
-                  key={toolCallId}
-                  result={part.output}
-                />
-              );
-            }
-
-            if (type === 'tool-updateDocument') {
-              const { toolCallId } = part;
-
-              if (part.output && 'error' in part.output) {
-                return (
-                  <div
-                    key={toolCallId}
-                    className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
-                  >
-                    Error updating document: {String(part.output.error)}
-                  </div>
-                );
-              }
-
-              return (
-                <div key={toolCallId} className="relative">
-                  <DocumentPreview
-                    result={part.output}
-                    args={{ ...part.output, isUpdate: true }}
-                  />
-                </div>
-              );
-            }
-
-            if (type === 'tool-requestSuggestions') {
-              const { toolCallId, state } = part;
-
-              return (
-                <Tool key={toolCallId} defaultOpen={true}>
-                  <ToolHeader type="tool-requestSuggestions" state={state} />
-                  <ToolContent>
-                    {state === 'input-available' && (
-                      <ToolInput input={part.input} />
-                    )}
-                    {state === 'output-available' && (
-                      <ToolOutput
-                        output={
-                          'error' in part.output ? (
-                            <div className="rounded border p-2 text-red-500">
-                              Error: {String(part.output.error)}
-                            </div>
-                          ) : (
-                            <DocumentToolResult
-                              type="request-suggestions"
-                              result={part.output}
-                            />
-                          )
-                        }
-                        errorText={undefined}
-                      />
-                    )}
-                  </ToolContent>
-                </Tool>
-              );
+              return <DocumentPreview key={toolCallId} result={part.output} />
             }
           })}
 
-            <MessageActions
-              key={`action-${message.id}`}
-              chatId={chatId}
-              message={message}
-              vote={vote}
-              isLoading={isLoading}
-              setMode={setMode}
-            />
+          <MessageActions
+            key={`action-${message.id}`}
+            chatId={chatId}
+            message={message}
+            vote={vote}
+            isLoading={isLoading}
+            setMode={setMode}
+          />
         </div>
       </div>
     </motion.div>
-  );
-};
+  )
+}
 
 export const PreviewMessage = memo(
   PurePreviewMessage,
   (prevProps, nextProps) => {
-    if (prevProps.isLoading !== nextProps.isLoading) return false;
-    if (prevProps.message.id !== nextProps.message.id) return false;
+    if (prevProps.isLoading !== nextProps.isLoading) return false
+    if (prevProps.message.id !== nextProps.message.id) return false
     if (prevProps.requiresScrollPadding !== nextProps.requiresScrollPadding)
-      return false;
-    if (!equal(prevProps.message.parts, nextProps.message.parts)) return false;
-    if (!equal(prevProps.vote, nextProps.vote)) return false;
+      return false
+    if (!equal(prevProps.message.parts, nextProps.message.parts)) return false
+    if (!equal(prevProps.vote, nextProps.vote)) return false
 
-    return false;
+    return false
   },
-);
+)
 
 export const ThinkingMessage = () => {
-  const role = 'assistant';
+  const role = "assistant"
 
   return (
     <motion.div
@@ -316,28 +254,28 @@ export const ThinkingMessage = () => {
         </div>
       </div>
     </motion.div>
-  );
-};
+  )
+}
 
 const LoadingText = ({ children }: { children: React.ReactNode }) => {
   return (
     <motion.div
-      animate={{ backgroundPosition: ['100% 50%', '-100% 50%'] }}
+      animate={{ backgroundPosition: ["100% 50%", "-100% 50%"] }}
       transition={{
         duration: 1.5,
         repeat: Number.POSITIVE_INFINITY,
-        ease: 'linear',
+        ease: "linear",
       }}
       style={{
         background:
-          'linear-gradient(90deg, hsl(var(--muted-foreground)) 0%, hsl(var(--muted-foreground)) 35%, hsl(var(--foreground)) 50%, hsl(var(--muted-foreground)) 65%, hsl(var(--muted-foreground)) 100%)',
-        backgroundSize: '200% 100%',
-        WebkitBackgroundClip: 'text',
-        backgroundClip: 'text',
+          "linear-gradient(90deg, hsl(var(--muted-foreground)) 0%, hsl(var(--muted-foreground)) 35%, hsl(var(--foreground)) 50%, hsl(var(--muted-foreground)) 65%, hsl(var(--muted-foreground)) 100%)",
+        backgroundSize: "200% 100%",
+        WebkitBackgroundClip: "text",
+        backgroundClip: "text",
       }}
       className="flex items-center text-transparent"
     >
       {children}
     </motion.div>
-  );
-};
+  )
+}

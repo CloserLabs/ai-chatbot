@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "[ -z \"$SKIP_DB_MIGRATE\" ] && tsx lib/db/migrate || echo 'Skipping DB migration' && next build",
+    "build": "next build",
+    "build:with-migrate": "tsx lib/db/migrate && next build",
     "start": "next start",
     "lint": "biome lint --write --unsafe",
     "lint:fix": "biome lint --write --unsafe && biome format --write",
@@ -68,7 +69,7 @@
     "geist": "^1.3.1",
     "lucide-react": "^0.446.0",
     "nanoid": "^5.0.8",
-    "next": "15.3.0-canary.31",
+    "next": "15.5.3",
     "next-auth": "5.0.0-beta.25",
     "next-themes": "^0.3.0",
     "orderedmap": "^2.1.1",
