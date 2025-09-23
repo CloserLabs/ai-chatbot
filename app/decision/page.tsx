@@ -1,21 +1,23 @@
-import { Card, CardContent } from "@/components/ui/card"
 import { SalesChartBar } from "@/components/ui/shadcn-io/bar-chart-02/sales"
-import { DataTables } from "./_components/data-tables"
+import { SkuDataTables } from "./_components/sku"
 import { StatsHeader } from "./_components/stats-header"
+import { Warehouse } from "./_components/warehouse"
 
 export default function Page() {
   return (
-    <div className="p-4">
+    <div className="flex flex-col gap-4 p-4">
       <StatsHeader />
 
-      <div className="mt-6 flex flex-col gap-4">
-        <Card className="w-full">
-          <CardContent className="px-0">
-            <SalesChartBar />
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="col-span-2 h-[600px]">
+          <SalesChartBar />
+        </div>
 
-        <DataTables />
+        <div className="col-span-1 h-[600px]">
+          <SkuDataTables />
+        </div>
+
+        <Warehouse />
       </div>
     </div>
   )

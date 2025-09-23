@@ -96,21 +96,21 @@ const rankingTrendData = [
 const salesConfig = {
   value: {
     label: "매출",
-    color: "#ef4444",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig
 
 const reviewConfig = {
   value: {
     label: "리뷰 수",
-    color: "#3b82f6",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig
 
 const rankingConfig = {
   value: {
     label: "순위",
-    color: "#10b981",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig
 
@@ -139,11 +139,11 @@ export function TrendCharts() {
                 interval={6}
               />
               <YAxis
-                width={25}
+                width={35}
                 tickLine={false}
                 axisLine={false}
                 tick={{ fontSize: 10 }}
-                tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                tickFormatter={(value) => `${(value).toLocaleString()}`}
               />
               <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
               <Bar dataKey="value" fill="var(--color-value)">
